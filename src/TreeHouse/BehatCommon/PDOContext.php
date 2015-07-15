@@ -2,7 +2,6 @@
 
 namespace TreeHouse\BehatCommon;
 
-use Doctrine\Common\Inflector\Inflector;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use PHPUnit_Framework_Assert as Assert;
@@ -80,9 +79,9 @@ class PDOContext extends AbstractPersistenceContext
      */
     protected function assertDataNotPersisted($name, array $data)
     {
-        $alias = $this->convertNameToTable($this->singularize($name));
+        $table = $this->convertNameToTable($this->singularize($name));
 
-        $this->assertRowsHaveNotBeenPersisted($alias, $data);
+        $this->assertRowsHaveNotBeenPersisted($table, $data);
     }
 
     /**
@@ -195,7 +194,7 @@ class PDOContext extends AbstractPersistenceContext
      */
     protected function convertNameToTable($name)
     {
-        return Inflector::pluralize($name);
+        return $name;
     }
 
     /**
