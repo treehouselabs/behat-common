@@ -133,7 +133,7 @@ class SeoContext extends RawMinkContext
                 $needle = substr($action, 0, -2);
                 break;
             default:
-                Throw \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
         }
 
         Assert::assertContains($needle, $this->getRobotDirectives());
@@ -154,7 +154,7 @@ class SeoContext extends RawMinkContext
                 $needle = "nofollow";
                 break;
             default:
-                Throw \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
         }
 
         Assert::assertContains($needle, $this->getRobotDirectives());
