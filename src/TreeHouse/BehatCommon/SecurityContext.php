@@ -16,9 +16,6 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-/**
- * @codeCoverageIgnore
- */
 class SecurityContext extends RawMinkContext implements KernelAwareContext
 {
     use KernelAwareTrait;
@@ -52,21 +49,21 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
      * @param UserProviderInterface $user_provider
      * @param TokenStorageInterface $token_storage
      * @param SessionInterface      $session
-     * @param string                $defaultLoginProperty
-     * @param string                $defaultProviderKey
+     * @param string                $default_login_property
+     * @param string                $default_provider_key
      */
     public function __construct(
         UserProviderInterface $user_provider,
         TokenStorageInterface $token_storage = null,
         SessionInterface $session = null,
-        $defaultLoginProperty = 'email',
-        $defaultProviderKey = 'main'
+        $default_login_property = 'username',
+        $default_provider_key = 'main'
     ) {
         $this->userProvider = $user_provider;
         $this->tokenStorage = $token_storage;
         $this->symfonySession = $session;
-        $this->defaultLoginProperty = $defaultLoginProperty;
-        $this->defaultProviderKey = $defaultProviderKey;
+        $this->defaultLoginProperty = $default_login_property;
+        $this->defaultProviderKey = $default_provider_key;
     }
 
     /**
@@ -188,7 +185,7 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
      *
      * @throws UnsupportedDriverActionException
      */
-    private function loginAs($value, $providerKey = null)
+    protected function loginAs($value, $providerKey = null)
     {
         $providerKey = $providerKey ?: $this->defaultProviderKey;
         $driver = $this->getSession()->getDriver();
@@ -216,7 +213,7 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
      *
      * @throws UnsupportedDriverActionException
      */
-    private function logout($providerKey = null)
+    protected function logout($providerKey = null)
     {
         $providerKey = $providerKey ?: $this->defaultProviderKey;
 
@@ -247,7 +244,7 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
      *
      * @throws \RuntimeException
      */
-    private function findUser($value)
+    protected function findUser($value)
     {
         try {
             $user = $this->getUserProvider()->loadUserByUsername($value);
@@ -265,7 +262,7 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
     /**
      * @return UserProviderInterface
      */
-    private function getUserProvider()
+    protected function getUserProvider()
     {
         return $this->userProvider;
     }
@@ -273,7 +270,7 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
     /**
      * @return TokenStorageInterface
      */
-    private function getTokenStorage()
+    protected function getTokenStorage()
     {
         if (!$this->tokenStorage) {
             return $this->getContainer()->get('security.token_storage');
@@ -285,7 +282,7 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
     /**
      * @return SessionInterface
      */
-    private function getSymfonySession()
+    protected function getSymfonySession()
     {
         if (!$this->symfonySession) {
             return $this->getContainer()->get('session');
@@ -300,7 +297,7 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
      *
      * @return mixed
      */
-    private function getObjectValue($object, $property)
+    protected function getObjectValue($object, $property)
     {
         $propertyAccessor = new PropertyAccessor();
         $value = $propertyAccessor->getValue($object, $property);

@@ -10,7 +10,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Nelmio\Alice\Fixtures\Loader;
 use TreeHouse\BehatCommon\Alice\Instances\Instantiator\Methods\ObjectConstructor;
 
-abstract class AbstractPersistenceContext extends RawMinkContext implements PersistenceContextInterface
+abstract class AbstractPersistenceContext extends RawMinkContext
 {
     /**
      * @var string

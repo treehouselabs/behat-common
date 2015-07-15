@@ -128,22 +128,22 @@ class PDOContext extends AbstractPersistenceContext
      */
     protected function find($table, array $criteria)
     {
-        $parameters = [];
+        $parts = [];
         $conn = $this->getConnection();
-        $sql = sprintf('SELECT * FROM `%s` WHERE 1', $table);
-        $firstKey = reset(array_keys($criteria));
+        unset($criteria['profile.date_of_birth']);
         foreach ($criteria as $key => $value) {
-            if ($key === $firstKey) {
-                $prefix = 'WHERE';
-            } else {
-                $prefix = 'AND';
-            }
-            $parameters[$key] = ':' . $key;
-            $sql .= sprintf(' %s %s = :%s', $prefix, $key, $parameters[$key]);
+            $parts[] = sprintf('%s = :%s', $key, $key);
+        }
+
+        if (empty($criteria)) {
+            $sql = sprintf('SELECT * FROM `%s`', $table);
+        } else {
+            $sql = sprintf('SELECT * FROM `%s` WHERE %s', $table, implode(' AND ', $parts));
         }
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute($parameters);
+        $stmt->execute($criteria);
+
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (array_key_exists(0, $result)) {
@@ -201,7 +201,7 @@ class PDOContext extends AbstractPersistenceContext
     /**
      * {@inheritdoc}
      */
-    private function persistRows($table, array $rows)
+    protected function persistRows($table, array $rows)
     {
         foreach ($rows as $row) {
             $row = $this->applyMapping($this->getFieldMapping($table), $row);
@@ -214,28 +214,28 @@ class PDOContext extends AbstractPersistenceContext
     /**
      * {@inheritdoc}
      */
-    private function assertRowsHaveBeenPersisted($table, $rows)
+    protected function assertRowsHaveBeenPersisted($table, $rows)
     {
         foreach ($rows as $criteria) {
             $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
             $this->transformFixture($table, $criteria);
             $criteria = $this->parseFormatters($criteria);
             $match = $this->find($table, $criteria);
-            Assert::assertNotNull($match);
+            Assert::assertNotEmpty($match);
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    private function assertRowsHaveNotBeenPersisted($table, $rows)
+    protected function assertRowsHaveNotBeenPersisted($table, $rows)
     {
         foreach ($rows as $criteria) {
             $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
             $this->transformFixture($table, $criteria);
             $criteria = $this->parseFormatters($criteria);
             $match = $this->find($table, $criteria);
-            Assert::assertNotNull(
+            Assert::assertNotEmpty(
                 $match,
                 sprintf(
                     'There should not be a record in table "%s" with these criteria: %s',

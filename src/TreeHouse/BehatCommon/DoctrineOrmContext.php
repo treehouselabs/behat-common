@@ -136,7 +136,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     /**
      * {@inheritdoc}
      */
-    private function persistRows($alias, array $rows)
+    protected function persistRows($alias, array $rows)
     {
         foreach ($rows as $row) {
             $row = $this->applyMapping($this->getFieldMapping($alias), $row);
@@ -152,7 +152,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      *
      * @return array
      */
-    private function rowToEntityData($entityName, array $row, $useDefaults = true)
+    protected function rowToEntityData($entityName, array $row, $useDefaults = true)
     {
         if ($useDefaults) {
             $row = array_merge($this->getDefaultFixture($entityName), $row);
@@ -168,7 +168,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     /**
      * {@inheritdoc}
      */
-    private function assertRowsHaveBeenPersisted($alias, $rows)
+    protected function assertRowsHaveBeenPersisted($alias, $rows)
     {
         foreach ($rows as $row) {
             $criteria = $this->applyMapping($this->getFieldMapping($alias), $row);
@@ -190,7 +190,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     /**
      * {@inheritdoc}
      */
-    private function assertRowsHaveNotBeenPersisted($alias, $rows)
+    protected function assertRowsHaveNotBeenPersisted($alias, $rows)
     {
         foreach ($rows as $criteria) {
             $criteria = $this->applyMapping($this->getFieldMapping($alias), $criteria);
@@ -214,7 +214,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      *
      * @return string
      */
-    private function convertNameToAlias($name)
+    protected function convertNameToAlias($name)
     {
         if (stristr($name, ':')) {
             // already aliased
@@ -231,7 +231,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     /**
      * @return EntityManagerInterface
      */
-    private function getEntityManager()
+    protected function getEntityManager()
     {
         if (!$this->entityManager) {
             $this->entityManager = $this->getContainer()->get('doctrine.orm.default_entity_manager');
@@ -244,7 +244,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      * @param string $alias
      * @param array  $entityData
      */
-    private function persistEntityData($alias, array $entityData)
+    protected function persistEntityData($alias, array $entityData)
     {
         $entity = $this->entityDataToEntity($alias, $entityData);
         $em = $this->getEntityManager();
@@ -259,7 +259,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      *
      * @return object
      */
-    private function entityDataToEntity($alias, array $entityData)
+    protected function entityDataToEntity($alias, array $entityData)
     {
         $class = $this->getEntityManager()->getClassMetadata($alias)->getName();
 
@@ -270,7 +270,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      * @param object $object
      * @param mixed  $id
      */
-    private function setId($object, $id)
+    protected function setId($object, $id)
     {
         // use reflection to set the id (we shouldn't have a setter for this)
         $reflectionClass = new \ReflectionClass($object);
