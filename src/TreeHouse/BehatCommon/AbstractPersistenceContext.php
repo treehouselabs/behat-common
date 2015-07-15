@@ -13,79 +13,60 @@ use TreeHouse\BehatCommon\Alice\Instances\Instantiator\Methods\ObjectConstructor
 abstract class AbstractPersistenceContext extends RawMinkContext
 {
     /**
-     * @var string
+     * @var bool
      */
-    protected $purgeDatabaseTag;
+    protected $purgedDb = false;
 
     /**
-     * @var array
+     * @AfterScenario
      */
-    private static $applicableTags = [];
-
-    /**
-     * @param string $purge_database_tag
-     */
-    public function __construct($purge_database_tag = 'purgedb')
+    public function afterScenario()
     {
-        $this->purgeDatabaseTag = $purge_database_tag;
+        $this->purgedDb = false;
     }
 
-    /**
-     * @BeforeFeature
-     * This is needed here because (although documented otherwise) Behat does not
-     * properly cascade feature tags to the BeforeScenarioScope (see beforeScenario() below)
-     *
-     * @see TaggedNodeInterface::getTags()
-     */
-    public static function beforeFeature(BeforeFeatureScope $scope)
+    protected function ensurePurgedDb()
     {
-        self::$applicableTags = $scope->getFeature()->getTags();
-    }
+        if (!$this->purgedDb) {
+            $this->purgeDatabase();
 
-    /**
-     * @BeforeScenario
-     */
-    public function beforeScenario(BeforeScenarioScope $scope)
-    {
-        if (!$this->purgeDatabaseTag) {
-            return;
+            $this->purgedDb = true;
         }
-
-        $tags = array_unique(array_merge(self::$applicableTags, $scope->getScenario()->getTags()));
-        if (!in_array($this->purgeDatabaseTag, $tags)) {
-            return;
-        }
-
-        $this->purgeDatabase();
     }
 
     /**
      * @Given /^the following ((?!.*should).*) exist(s)?:$/
      *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function theFollowingDataShouldBePersisted($name, TableNode $data)
     {
+        $this->ensurePurgedDb();
+
         $this->persistData($name, $data->getHash());
     }
 
     /**
      * @Then /^the following (.*?) should( still)? exist(s)?:$/
      *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function theFollowingDataShouldHaveBeenPersisted($name, TableNode $data)
     {
+        $this->ensurePurgedDb();
+
         $this->assertDataPersisted($name, $data->getHash());
     }
 
     /**
-     * @Then /^the following (.*?) should NOT exist:$/
+     * @Then /^the following (.*?) should not exist:$/
      *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function theFollowingDataShouldNotHaveBeenPersisted($name, TableNode $data)
     {
+        $this->ensurePurgedDb();
+
         $this->assertDataNotPersisted($name, $data->getHash());
     }
 

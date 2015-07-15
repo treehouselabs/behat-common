@@ -16,7 +16,7 @@ trait KernelAwareTrait
     private $kernel;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function setKernel(KernelInterface $kernel)
     {

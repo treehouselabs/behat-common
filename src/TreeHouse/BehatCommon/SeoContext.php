@@ -51,6 +51,26 @@ class SeoContext extends RawMinkContext
     }
 
     /**
+     * @Then there should be a meta-tag with property :propertyValue and content :contentValue
+     */
+    public function thereShouldBeAMetaTagWithPropertyAndContent($propertyValue, $contentValue)
+    {
+        $tag = $this->getMetaTagByProperty($propertyValue);
+
+        Assert::assertSame($contentValue, $tag->getAttribute('content'));
+    }
+
+    /**
+     * @Then there should be a meta-tag with property :propertyValue and content matching :contentValueRegex
+     */
+    public function thereShouldBeAMetaTagWithPropertyAndContentMatching($propertyValue, $contentValueRegex)
+    {
+        $tag = $this->getMetaTagByProperty($propertyValue);
+
+        Assert::assertRegExp($contentValueRegex, $tag->getAttribute('content'));
+    }
+
+    /**
      * @Then there should be a meta-tag with attribute :attributeKey and value :attributeValue
      */
     public function thereShouldBeAMetaTagWithAttributeAndValue($attributeKey, $attributeValue)
@@ -72,6 +92,14 @@ class SeoContext extends RawMinkContext
     public function thereShouldBeALinkTitled($title)
     {
         $this->assertSession()->elementExists('css', sprintf('a:contains("%s")', $title));
+    }
+
+    /**
+     * @Then there should not be a link titled :title
+     */
+    public function thereShouldNotBeALinkTitled($title)
+    {
+        $this->assertSession()->elementNotExists('css', sprintf('a:contains("%s")', $title));
     }
 
     /**
@@ -125,8 +153,28 @@ class SeoContext extends RawMinkContext
                 $needle = substr($action, 0, -2);
                 break;
             default:
-                $needle = $action;
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
+        }
+
+        Assert::assertContains($needle, $this->getRobotDirectives());
+    }
+
+    /**
+     * @Then the page can not be :action by robots
+     */
+    public function thePageCanNotBeActionByRobots($action)
+    {
+        $action = strtolower($action);
+
+        switch ($action) {
+            case 'indexed':
+                $needle = "noindex";
                 break;
+            case 'followed':
+                $needle = "nofollow";
+                break;
+            default:
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
         }
 
         Assert::assertContains($needle, $this->getRobotDirectives());
@@ -188,7 +236,17 @@ class SeoContext extends RawMinkContext
      */
     protected function getMetaTag($name)
     {
-        return $this->assertSession()->elementExists('css', sprintf('meta[name=%s]', $name));
+        return $this->assertSession()->elementExists('css', sprintf('meta[name="%s"]', $name));
+    }
+
+    /**
+     * @param string $property
+     *
+     * @return NodeElement
+     */
+    protected function getMetaTagByProperty($property)
+    {
+        return $this->assertSession()->elementExists('css', sprintf('meta[property="%s"]', $property));
     }
 
     /**

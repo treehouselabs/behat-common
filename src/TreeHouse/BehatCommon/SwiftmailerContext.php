@@ -187,7 +187,7 @@ class SwiftmailerContext extends RawMinkContext implements KernelAwareContext
      */
     public function theEmailBodyShouldNotHaveAttachment($name)
     {
-        Assert::assertFalse(in_array($name, $this->getEmailAttachments()), sprintf('File with name "%s" should NOT be found in the attachment(s)', $name));
+        Assert::assertFalse(in_array($name, $this->getEmailAttachments()), sprintf('File with name "%s" should not be found in the attachment(s)', $name));
     }
 
     /**

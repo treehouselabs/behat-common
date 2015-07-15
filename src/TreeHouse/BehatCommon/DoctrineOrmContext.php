@@ -7,6 +7,7 @@ use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\Common\Util\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit_Framework_Assert as Assert;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwareContext
 {
@@ -25,21 +26,17 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     /**
      * @param EntityManagerInterface|null $entity_manager
      * @param string                      $default_prefix
-     * @param string                      $purge_database_tag
      */
     public function __construct(
         EntityManagerInterface $entity_manager = null,
-        $default_prefix = 'AppBundle',
-        $purge_database_tag = 'purgedb'
+        $default_prefix = 'AppBundle'
     ) {
         $this->entityManager = $entity_manager;
         $this->defaultPrefix = $default_prefix;
-
-        parent::__construct($purge_database_tag);
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function persistData($name, array $data)
     {
@@ -49,7 +46,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function assertDataPersisted($name, array $data)
     {
@@ -59,7 +56,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function assertDataNotPersisted($name, array $data)
     {
@@ -69,7 +66,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function purgeDatabase()
     {
@@ -93,6 +90,10 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
         foreach ($row as $property => $value) {
             $propertyName = Inflector::camelize($property);
             $fieldType    = $meta->getTypeOfField($propertyName);
+
+            if (stristr($value, '.')) {
+                continue;
+            }
 
             if (mb_strtolower($value) === 'null') {
                 $value = null;
@@ -134,7 +135,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function persistRows($alias, array $rows)
     {
@@ -166,7 +167,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function assertRowsHaveBeenPersisted($alias, $rows)
     {
@@ -188,7 +189,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function assertRowsHaveNotBeenPersisted($alias, $rows)
     {
@@ -251,6 +252,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
         $em->persist($entity);
         $em->flush($entity);
         $em->refresh($entity);
+        $em->clear($entity);
     }
 
     /**
@@ -262,8 +264,34 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     protected function entityDataToEntity($alias, array $entityData)
     {
         $class = $this->getEntityManager()->getClassMetadata($alias)->getName();
+        $embedded = $this->stripEmbeddedData($entityData);
+        $object = $this->parseFormatters($entityData, $class);
 
-        return $this->parseFormatters($entityData, $class);
+        $accessor = new PropertyAccessor();
+        foreach ($embedded as $key => $value) {
+            $accessor->setValue($object, $key, $value);
+        }
+
+        return $object;
+    }
+
+    /**
+     * @param array $entityData
+     *
+     * @return array
+     */
+    protected function stripEmbeddedData(array &$entityData)
+    {
+        $embedded = [];
+
+        foreach ($entityData as $key => $value) {
+            if (stristr($key, '.')) {
+                $embedded[$key] = $value;
+                unset($entityData[$key]);
+            }
+        }
+
+        return $embedded;
     }
 
     /**

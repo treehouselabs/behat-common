@@ -36,7 +36,7 @@ class FormContext extends RawMinkContext
     }
 
     /**
-     * @Then the field :name should not/NOT have an error containing :message
+     * @Then the field :name should not have an error containing :message
      */
     public function theFieldShouldNotHaveAnErrorContaining($name, $message)
     {
