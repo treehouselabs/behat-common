@@ -75,6 +75,14 @@ class SeoContext extends RawMinkContext
     }
 
     /**
+     * @Then there should not be a link titled :title
+     */
+    public function thereShouldNotBeALinkTitled($title)
+    {
+        $this->assertSession()->elementNotExists('css', sprintf('a:contains("%s")', $title));
+    }
+
+    /**
      * @Then there should be a link titled :title with "nofollow"
      */
     public function thereShouldBeALinkTitledWithNoFollow($title)
@@ -125,8 +133,28 @@ class SeoContext extends RawMinkContext
                 $needle = substr($action, 0, -2);
                 break;
             default:
-                $needle = $action;
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
+        }
+
+        Assert::assertContains($needle, $this->getRobotDirectives());
+    }
+
+    /**
+     * @Then the page can not be :action by robots
+     */
+    public function thePageCanNotBeActionByRobots($action)
+    {
+        $action = strtolower($action);
+
+        switch ($action) {
+            case 'indexed':
+                $needle = "noindex";
                 break;
+            case 'followed':
+                $needle = "nofollow";
+                break;
+            default:
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
         }
 
         Assert::assertContains($needle, $this->getRobotDirectives());
