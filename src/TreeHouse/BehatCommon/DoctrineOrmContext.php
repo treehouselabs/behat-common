@@ -30,7 +30,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     public function __construct(
         EntityManagerInterface $entity_manager = null,
         $default_prefix = 'AppBundle',
-        $purge_database_tag = 'database'
+        $purge_database_tag = null
     ) {
         $this->entityManager = $entity_manager;
         $this->defaultPrefix = $default_prefix;

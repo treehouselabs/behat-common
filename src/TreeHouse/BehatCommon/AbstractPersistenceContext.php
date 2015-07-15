@@ -25,7 +25,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext implements Pers
     /**
      * @param string $purge_database_tag
      */
-    public function __construct($purge_database_tag = 'purgedb')
+    public function __construct($purge_database_tag = null)
     {
         $this->purgeDatabaseTag = $purge_database_tag;
     }
@@ -47,6 +47,10 @@ abstract class AbstractPersistenceContext extends RawMinkContext implements Pers
      */
     public function beforeScenario(BeforeScenarioScope $scope)
     {
+        if (!$this->purgeDatabaseTag) {
+            return;
+        }
+
         $tags = array_unique(array_merge(self::$applicableTags, $scope->getScenario()->getTags()));
         if (!in_array($this->purgeDatabaseTag, $tags)) {
             return;

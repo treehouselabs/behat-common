@@ -7,8 +7,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Base context providing access to the symfony kernel
- *
- * @codeCoverageIgnore
  */
 trait KernelAwareTrait
 {
@@ -28,7 +26,7 @@ trait KernelAwareTrait
     /**
      * @return KernelInterface
      */
-    public function getKernel()
+    protected function getKernel()
     {
         return $this->kernel;
     }
@@ -36,7 +34,7 @@ trait KernelAwareTrait
     /**
      * @return ContainerInterface
      */
-    public function getContainer()
+    protected function getContainer()
     {
         return $this->kernel->getContainer();
     }

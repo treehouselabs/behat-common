@@ -41,7 +41,7 @@ class PDOContext extends AbstractPersistenceContext
      * @param array       $options
      * @param string|null $purge_database_tag
      */
-    public function __construct($dsn, $username, $password, array $options = [], $purge_database_tag = 'purgedb')
+    public function __construct($dsn, $username, $password, array $options = [], $purge_database_tag = null)
     {
         $this->dsn = $dsn;
         $this->username = $username;
