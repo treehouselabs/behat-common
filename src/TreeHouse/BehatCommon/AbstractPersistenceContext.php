@@ -6,8 +6,8 @@ use Behat\Behat\Hook\Scope\BeforeFeatureScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
+use Doctrine\Common\Inflector\Inflector;
 use Nelmio\Alice\Fixtures\Loader;
-use Symfony\Component\PropertyAccess\StringUtil;
 use TreeHouse\BehatCommon\Alice\Instances\Instantiator\Methods\ObjectConstructor;
 
 abstract class AbstractPersistenceContext extends RawMinkContext implements PersistenceContextInterface
@@ -25,7 +25,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext implements Pers
     /**
      * @param string $purge_database_tag
      */
-    public function __construct($purge_database_tag = null)
+    public function __construct($purge_database_tag = 'purgedb')
     {
         $this->purgeDatabaseTag = $purge_database_tag;
     }
@@ -127,9 +127,9 @@ abstract class AbstractPersistenceContext extends RawMinkContext implements Pers
      *
      * @return string
      */
-    protected function singularify($value)
+    protected function singularize($value)
     {
-        $singularified = StringUtil::singularify($value);
+        $singularified = Inflector::singularize($value);
 
         if (is_array($singularified)) {
             $singularified = end($singularified);

@@ -41,7 +41,7 @@ class PDOContext extends AbstractPersistenceContext
      * @param array       $options
      * @param string|null $purge_database_tag
      */
-    public function __construct($dsn, $username, $password, array $options = [], $purge_database_tag = null)
+    public function __construct($dsn, $username, $password, array $options = [], $purge_database_tag = 'purgedb')
     {
         $this->dsn = $dsn;
         $this->username = $username;
@@ -57,7 +57,7 @@ class PDOContext extends AbstractPersistenceContext
      */
     protected function persistData($name, array $data)
     {
-        $table = $this->convertNameToTable($this->singularify($name));
+        $table = $this->convertNameToTable($this->singularize($name));
 
         $this->persistRows($table, $data);
     }
@@ -68,7 +68,7 @@ class PDOContext extends AbstractPersistenceContext
      */
     protected function assertDataPersisted($name, array $data)
     {
-        $table = $this->convertNameToTable($this->singularify($name));
+        $table = $this->convertNameToTable($this->singularize($name));
 
         $this->assertRowsHaveBeenPersisted($table, $data);
     }
@@ -80,7 +80,7 @@ class PDOContext extends AbstractPersistenceContext
      */
     protected function assertDataNotPersisted($name, array $data)
     {
-        $alias = $this->convertNameToTable($this->singularify($name));
+        $alias = $this->convertNameToTable($this->singularize($name));
 
         $this->assertRowsHaveNotBeenPersisted($alias, $data);
     }

@@ -30,7 +30,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     public function __construct(
         EntityManagerInterface $entity_manager = null,
         $default_prefix = 'AppBundle',
-        $purge_database_tag = null
+        $purge_database_tag = 'purgedb'
     ) {
         $this->entityManager = $entity_manager;
         $this->defaultPrefix = $default_prefix;
@@ -43,7 +43,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      */
     protected function persistData($name, array $data)
     {
-        $alias = $this->convertNameToAlias($this->singularify($name));
+        $alias = $this->convertNameToAlias($this->singularize($name));
 
         $this->persistRows($alias, $data);
     }
@@ -53,7 +53,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      */
     public function assertDataPersisted($name, array $data)
     {
-        $alias = $this->convertNameToAlias($this->singularify($name));
+        $alias = $this->convertNameToAlias($this->singularize($name));
 
         $this->assertRowsHaveBeenPersisted($alias, $data);
     }
@@ -63,7 +63,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      */
     public function assertDataNotPersisted($name, array $data)
     {
-        $alias = $this->convertNameToAlias($this->singularify($name));
+        $alias = $this->convertNameToAlias($this->singularize($name));
 
         $this->assertRowsHaveNotBeenPersisted($alias, $data);
     }
