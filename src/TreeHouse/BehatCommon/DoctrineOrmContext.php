@@ -42,7 +42,11 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     {
         $alias = $this->convertNameToAlias($this->singularize($name));
 
-        $this->persistRows($alias, $data);
+        foreach ($data as $row) {
+            $row = $this->applyMapping($this->getFieldMapping($alias), $row);
+            $row = $this->rowToEntityData($alias, $row, true);
+            $this->persistEntityData($alias, $row);
+        }
     }
 
     /**
@@ -52,7 +56,20 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     {
         $alias = $this->convertNameToAlias($this->singularize($name));
 
-        $this->assertRowsHaveBeenPersisted($alias, $data);
+        foreach ($data as $row) {
+            $criteria = $this->applyMapping($this->getFieldMapping($alias), $row);
+            $criteria = $this->rowToEntityData($alias, $criteria, false);
+            $entity = $this->getEntityManager()->getRepository($alias)->findOneBy($criteria);
+
+            Assert::assertNotNull(
+                $entity,
+                sprintf(
+                    'The repository should find data of type "%s" with these criteria: %s',
+                    $alias,
+                    json_encode($criteria)
+                )
+            );
+        }
     }
 
     /**
@@ -62,7 +79,20 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     {
         $alias = $this->convertNameToAlias($this->singularize($name));
 
-        $this->assertRowsHaveNotBeenPersisted($alias, $data);
+        foreach ($data as $criteria) {
+            $criteria = $this->applyMapping($this->getFieldMapping($alias), $criteria);
+            $criteria = $this->rowToEntityData($alias, $criteria, false);
+            $entity = $this->getEntityManager()->getRepository($alias)->findOneBy($criteria);
+
+            Assert::assertNull(
+                $entity,
+                sprintf(
+                    'The repository should not find data of type "%s" with these criteria: %s',
+                    $alias,
+                    json_encode($criteria)
+                )
+            );
+        }
     }
 
     /**
@@ -91,10 +121,6 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
             $propertyName = Inflector::camelize($property);
             $fieldType    = $meta->getTypeOfField($propertyName);
 
-            if (stristr($value, '.')) {
-                continue;
-            }
-
             if (mb_strtolower($value) === 'null') {
                 $value = null;
             }
@@ -114,8 +140,14 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                     break;
                 case null:
                     if ($value && $meta->hasAssociation($propertyName)) {
+                        if (is_array($jsonValue = json_decode($value, true))) {
+                            $criteria = $jsonValue;
+                        } else {
+                            $criteria = ['id' => $value];
+                        }
+
                         $class           = $meta->getAssociationTargetClass($propertyName);
-                        $associatedValue = $this->getEntityManager()->getRepository($class)->find($value);
+                        $associatedValue = $this->getEntityManager()->getRepository($class)->findOneBy($criteria);
 
                         if ($associatedValue === null) {
                             throw new \RuntimeException(sprintf('There is no %s entity with ID %s to associate with this %s entity', $class, $value, $entityName));
@@ -135,18 +167,6 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * @inheritdoc
-     */
-    protected function persistRows($alias, array $rows)
-    {
-        foreach ($rows as $row) {
-            $row = $this->applyMapping($this->getFieldMapping($alias), $row);
-            $row = $this->rowToEntityData($alias, $row, true);
-            $this->persistEntityData($alias, $row);
-        }
-    }
-
-    /**
      * @param string $entityName
      * @param array  $row
      * @param bool   $useDefaults
@@ -159,55 +179,10 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
             $row = array_merge($this->getDefaultFixture($entityName), $row);
         }
 
-
         $this->transformFixture($entityName, $row);
         $row = $this->transformEntityValues($entityName, $row);
 
         return $row;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function assertRowsHaveBeenPersisted($alias, $rows)
-    {
-        foreach ($rows as $row) {
-            $criteria = $this->applyMapping($this->getFieldMapping($alias), $row);
-            $criteria = $this->rowToEntityData($alias, $criteria, false);
-            $criteria = $this->parseFormatters($criteria);
-            $entity = $this->getEntityManager()->getRepository($alias)->findOneBy($criteria);
-
-            Assert::assertNotNull(
-                $entity,
-                sprintf(
-                    'The repository should find data of type "%s" with these criteria: %s',
-                    $alias,
-                    json_encode($criteria)
-                )
-            );
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function assertRowsHaveNotBeenPersisted($alias, $rows)
-    {
-        foreach ($rows as $criteria) {
-            $criteria = $this->applyMapping($this->getFieldMapping($alias), $criteria);
-            $criteria = $this->rowToEntityData($alias, $criteria, false);
-            $criteria = $this->parseFormatters($criteria);
-            $entity = $this->getEntityManager()->getRepository($alias)->findOneBy($criteria);
-
-            Assert::assertNull(
-                $entity,
-                sprintf(
-                    'The repository should not find data of type "%s" with these criteria: %s',
-                    $alias,
-                    json_encode($criteria)
-                )
-            );
-        }
     }
 
     /**
@@ -264,34 +239,19 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     protected function entityDataToEntity($alias, array $entityData)
     {
         $class = $this->getEntityManager()->getClassMetadata($alias)->getName();
-        $embedded = $this->stripEmbeddedData($entityData);
-        $object = $this->parseFormatters($entityData, $class);
+        $object = new $class();
 
         $accessor = new PropertyAccessor();
-        foreach ($embedded as $key => $value) {
+        foreach ($entityData as $key => $value) {
+            if ($key === 'id') {
+                $this->setId($object, $value);
+                continue;
+            }
+
             $accessor->setValue($object, $key, $value);
         }
 
         return $object;
-    }
-
-    /**
-     * @param array $entityData
-     *
-     * @return array
-     */
-    protected function stripEmbeddedData(array &$entityData)
-    {
-        $embedded = [];
-
-        foreach ($entityData as $key => $value) {
-            if (stristr($key, '.')) {
-                $embedded[$key] = $value;
-                unset($entityData[$key]);
-            }
-        }
-
-        return $embedded;
     }
 
     /**

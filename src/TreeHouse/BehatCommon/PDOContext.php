@@ -41,10 +41,10 @@ class PDOContext extends AbstractPersistenceContext
      */
     public function __construct($dsn, $username, $password, array $options = [])
     {
-        $this->dsn = $dsn;
+        $this->dsn      = $dsn;
         $this->username = $username;
         $this->password = $password;
-        $this->options = $options;
+        $this->options  = $options;
     }
 
     /**
@@ -54,27 +54,49 @@ class PDOContext extends AbstractPersistenceContext
     {
         $table = $this->convertNameToTable($this->singularize($name));
 
-        $this->persistRows($table, $data);
+        foreach ($data as $row) {
+            $row = $this->applyMapping($this->getFieldMapping($table), $row);
+            $row = array_merge($this->getDefaultFixture($table), $row);
+            $this->transformFixture($table, $row);
+            $this->insert($table, $row);
+        }
     }
 
     /**
      * @inheritdoc
      */
-    protected function assertDataPersisted($name, array $data)
+    protected function assertDataPersisted($name, array $criterias)
     {
         $table = $this->convertNameToTable($this->singularize($name));
 
-        $this->assertRowsHaveBeenPersisted($table, $data);
+        foreach ($criterias as $criteria) {
+            $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
+            $this->transformFixture($table, $criteria);
+            $match = $this->find($table, $criteria);
+            Assert::assertNotEmpty($match);
+        }
     }
 
     /**
      * @inheritdoc
      */
-    protected function assertDataNotPersisted($name, array $data)
+    protected function assertDataNotPersisted($name, array $criterias)
     {
         $table = $this->convertNameToTable($this->singularize($name));
 
-        $this->assertRowsHaveNotBeenPersisted($table, $data);
+        foreach ($criterias as $criteria) {
+            $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
+            $this->transformFixture($table, $criteria);
+            $match = $this->find($table, $criteria);
+            Assert::assertNotEmpty(
+                $match,
+                sprintf(
+                    'There should not be a record in table "%s" with these criteria: %s',
+                    $table,
+                    json_encode($criteria)
+                )
+            );
+        }
     }
 
     /**
@@ -91,7 +113,7 @@ class PDOContext extends AbstractPersistenceContext
             $parameters = [];
 
             foreach ($data as $key => $value) {
-                $parameters[$key] = ':'.$key;
+                $parameters[$key] = ':' . $key;
             }
             $conn->beginTransaction();
             $sql = sprintf(
@@ -121,7 +143,7 @@ class PDOContext extends AbstractPersistenceContext
     protected function find($table, array $criteria)
     {
         $parts = [];
-        $conn = $this->getConnection();
+        $conn  = $this->getConnection();
         unset($criteria['profile.date_of_birth']);
         foreach ($criteria as $key => $value) {
             $parts[] = sprintf('%s = :%s', $key, $key);
@@ -166,7 +188,7 @@ class PDOContext extends AbstractPersistenceContext
     /**
      * @return \PDO
      */
-    protected function getConnection()
+    private function getConnection()
     {
         if (!$this->connection) {
             $this->connection = new \PDO(
@@ -188,53 +210,5 @@ class PDOContext extends AbstractPersistenceContext
     protected function convertNameToTable($name)
     {
         return $name;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function persistRows($table, array $rows)
-    {
-        foreach ($rows as $row) {
-            $row = $this->applyMapping($this->getFieldMapping($table), $row);
-            $row = array_merge($this->getDefaultFixture($table), $row);
-            $this->transformFixture($table, $row);
-            $this->insert($table, $row);
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function assertRowsHaveBeenPersisted($table, $rows)
-    {
-        foreach ($rows as $criteria) {
-            $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
-            $this->transformFixture($table, $criteria);
-            $criteria = $this->parseFormatters($criteria);
-            $match = $this->find($table, $criteria);
-            Assert::assertNotEmpty($match);
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function assertRowsHaveNotBeenPersisted($table, $rows)
-    {
-        foreach ($rows as $criteria) {
-            $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
-            $this->transformFixture($table, $criteria);
-            $criteria = $this->parseFormatters($criteria);
-            $match = $this->find($table, $criteria);
-            Assert::assertNotEmpty(
-                $match,
-                sprintf(
-                    'There should not be a record in table "%s" with these criteria: %s',
-                    $table,
-                    json_encode($criteria)
-                )
-            );
-        }
     }
 }

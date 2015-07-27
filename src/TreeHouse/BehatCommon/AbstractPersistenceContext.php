@@ -5,8 +5,6 @@ namespace TreeHouse\BehatCommon;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Doctrine\Common\Inflector\Inflector;
-use Nelmio\Alice\Fixtures\Loader;
-use TreeHouse\BehatCommon\Alice\Instances\Instantiator\Methods\ObjectConstructor;
 
 abstract class AbstractPersistenceContext extends RawMinkContext
 {
@@ -46,37 +44,6 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     public function theFollowingDataShouldNotHaveBeenPersisted($name, TableNode $data)
     {
         $this->assertDataNotPersisted($name, $data->getHash());
-    }
-
-    /**
-     * @param array       $data
-     * @param string|null $class
-     *
-     * @return array|object
-     */
-    protected function parseFormatters(array $data, $class = null)
-    {
-        if ($class === null) {
-            $fixtureData = [[$data]];
-        } else {
-            $fixtureData = [$class => [$data]];
-        }
-
-        $loader = new Loader();
-
-        if ($class === null) {
-            $loader->addInstantiator(new ObjectConstructor());
-        }
-
-        $objectsOrArrays = $loader->load($fixtureData);
-
-        $parsed = reset($objectsOrArrays);
-
-        if ($class === null) {
-            return (array) $parsed;
-        }
-
-        return $parsed;
     }
 
     /**
