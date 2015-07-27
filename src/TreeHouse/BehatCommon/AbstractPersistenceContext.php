@@ -105,11 +105,11 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      *
      * Note: this is called before applyMapping(), so field names should be connection-agnostic!
      *
-     * @param string $alias
+     * @param string $type
      *
      * @return array
      */
-    protected function getDefaultFixture($alias)
+    protected function getDefaultFixture($type)
     {
         // implement this in your own subclass
         return [];
@@ -121,10 +121,10 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      *
      * Note: this is called before applyMapping(), so field names should stay connection-agnostic!
      *
-     * @param string $alias
+     * @param string $type
      * @param array  $fixture
      */
-    protected function transformFixture($alias, array &$fixture)
+    protected function transformFixture($type, array &$fixture)
     {
         // implement this in your own subclass
     }
