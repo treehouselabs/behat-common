@@ -2,8 +2,6 @@
 
 namespace TreeHouse\BehatCommon;
 
-use Behat\Behat\Hook\Scope\BeforeFeatureScope;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Doctrine\Common\Inflector\Inflector;
@@ -13,25 +11,11 @@ use TreeHouse\BehatCommon\Alice\Instances\Instantiator\Methods\ObjectConstructor
 abstract class AbstractPersistenceContext extends RawMinkContext
 {
     /**
-     * @var bool
+     * @Given /^the database has been purged$/
      */
-    protected $purgedDb = false;
-
-    /**
-     * @AfterScenario
-     */
-    public function afterScenario()
+    public function theDatabaseHasBeenPurged()
     {
-        $this->purgedDb = false;
-    }
-
-    protected function ensurePurgedDb()
-    {
-        if (!$this->purgedDb) {
-            $this->purgeDatabase();
-
-            $this->purgedDb = true;
-        }
+        $this->purgeDatabase();
     }
 
     /**
@@ -41,8 +25,6 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      */
     public function theFollowingDataShouldBePersisted($name, TableNode $data)
     {
-        $this->ensurePurgedDb();
-
         $this->persistData($name, $data->getHash());
     }
 
@@ -53,8 +35,6 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      */
     public function theFollowingDataShouldHaveBeenPersisted($name, TableNode $data)
     {
-        $this->ensurePurgedDb();
-
         $this->assertDataPersisted($name, $data->getHash());
     }
 
@@ -65,8 +45,6 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      */
     public function theFollowingDataShouldNotHaveBeenPersisted($name, TableNode $data)
     {
-        $this->ensurePurgedDb();
-
         $this->assertDataNotPersisted($name, $data->getHash());
     }
 
@@ -102,7 +80,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
-     * Singularifies a given value
+     * Singularifies a given value.
      *
      * @param string $value
      *
@@ -120,7 +98,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
-     * Removes a value with the given $key from an array, if it exists
+     * Removes a value with the given $key from an array, if it exists.
      *
      * @param string $key
      * @param array  $data
@@ -134,7 +112,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
 
     /**
      * Allows subclasses to apply their specific mapping to any data
-     * that is being persisted to, or queried against the database
+     * that is being persisted to, or queried against the database.
      *
      * @param array $mapping
      * @param array $data
@@ -156,7 +134,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
-     * Allows subclasses to define a base set of fixture data that will be used when persisting data to the database
+     * Allows subclasses to define a base set of fixture data that will be used when persisting data to the database.
      *
      * Note: this is called before applyMapping(), so field names should be connection-agnostic!
      *
@@ -186,7 +164,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
 
     /**
      * Return any mapping you want to be performed on
-     * data/criteria that will be tested against the database
+     * data/criteria that will be tested against the database.
      *
      * If you return an empty array no mapping will be applied
      * In all other cases every key in the original data
@@ -228,7 +206,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
 
     /**
      * Purges the relevant database, if the scenario was tagged
-     * with the tag configured during construction
+     * with the tag configured during construction.
      */
     abstract protected function purgeDatabase();
 }
