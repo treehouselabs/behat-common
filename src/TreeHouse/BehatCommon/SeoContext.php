@@ -51,6 +51,26 @@ class SeoContext extends RawMinkContext
     }
 
     /**
+     * @Then there should be a meta-tag with property :propertyValue and content :contentValue
+     */
+    public function thereShouldBeAMetaTagWithPropertyAndContent($propertyValue, $contentValue)
+    {
+        $tag = $this->getMetaTagByProperty($propertyValue);
+
+        Assert::assertSame($contentValue, $tag->getAttribute('content'));
+    }
+
+    /**
+     * @Then there should be a meta-tag with property :propertyValue and content matching :contentValueRegex
+     */
+    public function thereShouldBeAMetaTagWithPropertyAndContentMatching($propertyValue, $contentValueRegex)
+    {
+        $tag = $this->getMetaTagByProperty($propertyValue);
+
+        Assert::assertRegExp($contentValueRegex, $tag->getAttribute('content'));
+    }
+
+    /**
      * @Then there should be a meta-tag with attribute :attributeKey and value :attributeValue
      */
     public function thereShouldBeAMetaTagWithAttributeAndValue($attributeKey, $attributeValue)
@@ -216,7 +236,17 @@ class SeoContext extends RawMinkContext
      */
     protected function getMetaTag($name)
     {
-        return $this->assertSession()->elementExists('css', sprintf('meta[name=%s]', $name));
+        return $this->assertSession()->elementExists('css', sprintf('meta[name="%s"]', $name));
+    }
+
+    /**
+     * @param string $property
+     *
+     * @return NodeElement
+     */
+    protected function getMetaTagByProperty($property)
+    {
+        return $this->assertSession()->elementExists('css', sprintf('meta[property="%s"]', $property));
     }
 
     /**

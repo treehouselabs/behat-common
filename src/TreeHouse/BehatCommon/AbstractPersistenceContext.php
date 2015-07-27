@@ -2,8 +2,6 @@
 
 namespace TreeHouse\BehatCommon;
 
-use Behat\Behat\Hook\Scope\BeforeFeatureScope;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Doctrine\Common\Inflector\Inflector;
@@ -13,56 +11,17 @@ use TreeHouse\BehatCommon\Alice\Instances\Instantiator\Methods\ObjectConstructor
 abstract class AbstractPersistenceContext extends RawMinkContext
 {
     /**
-     * @var string
+     * @Given /^the database has been purged$/
      */
-    protected $purgeDatabaseTag;
-
-    /**
-     * @var array
-     */
-    private static $applicableTags = [];
-
-    /**
-     * @param string $purge_database_tag
-     */
-    public function __construct($purge_database_tag = 'purgedb')
+    public function theDatabaseHasBeenPurged()
     {
-        $this->purgeDatabaseTag = $purge_database_tag;
-    }
-
-    /**
-     * @BeforeFeature
-     * This is needed here because (although documented otherwise) Behat does not
-     * properly cascade feature tags to the BeforeScenarioScope (see beforeScenario() below)
-     *
-     * @see TaggedNodeInterface::getTags()
-     */
-    public static function beforeFeature(BeforeFeatureScope $scope)
-    {
-        self::$applicableTags = $scope->getFeature()->getTags();
-    }
-
-    /**
-     * @BeforeScenario
-     */
-    public function beforeScenario(BeforeScenarioScope $scope)
-    {
-        if (!$this->purgeDatabaseTag) {
-            return;
-        }
-
-        $tags = array_unique(array_merge(self::$applicableTags, $scope->getScenario()->getTags()));
-        if (!in_array($this->purgeDatabaseTag, $tags)) {
-            return;
-        }
-
         $this->purgeDatabase();
     }
 
     /**
      * @Given /^the following ((?!.*should).*) exist(s)?:$/
      *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function theFollowingDataShouldBePersisted($name, TableNode $data)
     {
@@ -72,7 +31,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     /**
      * @Then /^the following (.*?) should( still)? exist(s)?:$/
      *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function theFollowingDataShouldHaveBeenPersisted($name, TableNode $data)
     {
@@ -80,9 +39,9 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
-     * @Then /^the following (.*?) should NOT exist:$/
+     * @Then /^the following (.*?) should not exist:$/
      *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function theFollowingDataShouldNotHaveBeenPersisted($name, TableNode $data)
     {
@@ -121,7 +80,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
-     * Singularifies a given value
+     * Singularifies a given value.
      *
      * @param string $value
      *
@@ -139,7 +98,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
-     * Removes a value with the given $key from an array, if it exists
+     * Removes a value with the given $key from an array, if it exists.
      *
      * @param string $key
      * @param array  $data
@@ -153,7 +112,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
 
     /**
      * Allows subclasses to apply their specific mapping to any data
-     * that is being persisted to, or queried against the database
+     * that is being persisted to, or queried against the database.
      *
      * @param array $mapping
      * @param array $data
@@ -175,7 +134,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
-     * Allows subclasses to define a base set of fixture data that will be used when persisting data to the database
+     * Allows subclasses to define a base set of fixture data that will be used when persisting data to the database.
      *
      * Note: this is called before applyMapping(), so field names should be connection-agnostic!
      *
@@ -205,7 +164,7 @@ abstract class AbstractPersistenceContext extends RawMinkContext
 
     /**
      * Return any mapping you want to be performed on
-     * data/criteria that will be tested against the database
+     * data/criteria that will be tested against the database.
      *
      * If you return an empty array no mapping will be applied
      * In all other cases every key in the original data
@@ -220,6 +179,11 @@ abstract class AbstractPersistenceContext extends RawMinkContext
         // implement this in your own subclass
         return [];
     }
+
+    /**
+     * Purges the relevant database.
+     */
+    abstract protected function purgeDatabase();
 
     /**
      * @param string $name
@@ -244,10 +208,4 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      * @throw \PHPUnit_Framework_ExpectationFailedException
      */
     abstract protected function assertDataNotPersisted($name, array $data);
-
-    /**
-     * Purges the relevant database, if the scenario was tagged
-     * with the tag configured during construction
-     */
-    abstract protected function purgeDatabase();
 }

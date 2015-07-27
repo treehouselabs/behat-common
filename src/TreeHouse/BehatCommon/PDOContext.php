@@ -34,25 +34,21 @@ class PDOContext extends AbstractPersistenceContext
     private $connection;
 
     /**
-     * @param string      $dsn
-     * @param string      $username
-     * @param string      $password
-     * @param array       $options
-     * @param string|null $purge_database_tag
+     * @param string $dsn
+     * @param string $username
+     * @param string $password
+     * @param array  $options
      */
-    public function __construct($dsn, $username, $password, array $options = [], $purge_database_tag = 'purgedb')
+    public function __construct($dsn, $username, $password, array $options = [])
     {
         $this->dsn = $dsn;
         $this->username = $username;
         $this->password = $password;
         $this->options = $options;
-
-        parent::__construct($purge_database_tag);
     }
 
     /**
-     * @param string $name
-     * @param array  $data
+     * @inheritdoc
      */
     protected function persistData($name, array $data)
     {
@@ -62,8 +58,7 @@ class PDOContext extends AbstractPersistenceContext
     }
 
     /**
-     * @param string $name
-     * @param array  $data
+     * @inheritdoc
      */
     protected function assertDataPersisted($name, array $data)
     {
@@ -73,9 +68,7 @@ class PDOContext extends AbstractPersistenceContext
     }
 
     /**
-     * @Then /^the following (.*?) should NOT exist:$/
-     *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function assertDataNotPersisted($name, array $data)
     {
@@ -98,7 +91,7 @@ class PDOContext extends AbstractPersistenceContext
             $parameters = [];
 
             foreach ($data as $key => $value) {
-                $parameters[$key] = ':' . $key;
+                $parameters[$key] = ':'.$key;
             }
             $conn->beginTransaction();
             $sql = sprintf(
@@ -153,7 +146,7 @@ class PDOContext extends AbstractPersistenceContext
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function purgeDatabase()
     {
@@ -198,7 +191,7 @@ class PDOContext extends AbstractPersistenceContext
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function persistRows($table, array $rows)
     {
@@ -211,7 +204,7 @@ class PDOContext extends AbstractPersistenceContext
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function assertRowsHaveBeenPersisted($table, $rows)
     {
@@ -225,7 +218,7 @@ class PDOContext extends AbstractPersistenceContext
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function assertRowsHaveNotBeenPersisted($table, $rows)
     {

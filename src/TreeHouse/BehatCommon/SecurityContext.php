@@ -115,9 +115,9 @@ class SecurityContext extends RawMinkContext implements KernelAwareContext
     }
 
     /**
-     * @Then I should NOT be logged in
-     * @Then I should NOT be logged in as :value
-     * @Then I should NOT be logged in with :key :value
+     * @Then I should not be logged in
+     * @Then I should not be logged in as :value
+     * @Then I should not be logged in with :key :value
      *
      * @param string|null $keyOrValue
      * @param string|null $value
