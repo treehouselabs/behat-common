@@ -181,6 +181,11 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     }
 
     /**
+     * Purges the relevant database.
+     */
+    abstract protected function purgeDatabase();
+
+    /**
      * @param string $name
      * @param array  $data
      *
@@ -203,10 +208,4 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      * @throw \PHPUnit_Framework_ExpectationFailedException
      */
     abstract protected function assertDataNotPersisted($name, array $data);
-
-    /**
-     * Purges the relevant database, if the scenario was tagged
-     * with the tag configured during construction.
-     */
-    abstract protected function purgeDatabase();
 }
