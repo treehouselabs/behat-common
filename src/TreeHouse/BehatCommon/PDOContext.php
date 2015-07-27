@@ -188,7 +188,7 @@ class PDOContext extends AbstractPersistenceContext
     /**
      * @return \PDO
      */
-    private function getConnection()
+    protected function getConnection()
     {
         if (!$this->connection) {
             $this->connection = new \PDO(
