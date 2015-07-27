@@ -15,7 +15,6 @@
     "doctrine/orm": "~2.2",
     "doctrine/common": "~2.2",
     "doctrine/data-fixtures": "~1.1",
-    "nelmio/alice": "~2.0",
     "phpunit/phpunit": "~4.7",
     "swiftmailer/swiftmailer": ">=4.2.0,~5.0",
     "symfony/dependency-injection": "~2.7",

@@ -5,8 +5,6 @@ namespace TreeHouse\BehatCommon;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Doctrine\Common\Inflector\Inflector;
-use Nelmio\Alice\Fixtures\Loader;
-use TreeHouse\BehatCommon\Alice\Instances\Instantiator\Methods\ObjectConstructor;
 
 abstract class AbstractPersistenceContext extends RawMinkContext
 {
@@ -46,37 +44,6 @@ abstract class AbstractPersistenceContext extends RawMinkContext
     public function theFollowingDataShouldNotHaveBeenPersisted($name, TableNode $data)
     {
         $this->assertDataNotPersisted($name, $data->getHash());
-    }
-
-    /**
-     * @param array       $data
-     * @param string|null $class
-     *
-     * @return array|object
-     */
-    protected function parseFormatters(array $data, $class = null)
-    {
-        if ($class === null) {
-            $fixtureData = [[$data]];
-        } else {
-            $fixtureData = [$class => [$data]];
-        }
-
-        $loader = new Loader();
-
-        if ($class === null) {
-            $loader->addInstantiator(new ObjectConstructor());
-        }
-
-        $objectsOrArrays = $loader->load($fixtureData);
-
-        $parsed = reset($objectsOrArrays);
-
-        if ($class === null) {
-            return (array) $parsed;
-        }
-
-        return $parsed;
     }
 
     /**
@@ -138,11 +105,11 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      *
      * Note: this is called before applyMapping(), so field names should be connection-agnostic!
      *
-     * @param string $alias
+     * @param string $type
      *
      * @return array
      */
-    protected function getDefaultFixture($alias)
+    protected function getDefaultFixture($type)
     {
         // implement this in your own subclass
         return [];
@@ -154,10 +121,10 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      *
      * Note: this is called before applyMapping(), so field names should stay connection-agnostic!
      *
-     * @param string $alias
+     * @param string $type
      * @param array  $fixture
      */
-    protected function transformFixture($alias, array &$fixture)
+    protected function transformFixture($type, array &$fixture)
     {
         // implement this in your own subclass
     }
