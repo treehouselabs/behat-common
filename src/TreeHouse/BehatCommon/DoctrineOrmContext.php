@@ -108,12 +108,12 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     }
 
     /**
-     * Converts a fixture's values to ones that are expected by their entity's configuration
+     * Converts a fixture's values to ones that are expected by their entity's configuration.
      *
      * @todo Convert embedded objects to their proper entity objects (e.g.: {"title": "Foobar"})
      *
      * @param string $entityName
-     * @param array $row
+     * @param array  $row
      *
      * @return array
      */
@@ -122,7 +122,15 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
         $meta = $this->getEntityManager()->getClassMetadata($entityName);
         foreach ($row as $property => $value) {
             $propertyName = Inflector::camelize($property);
-            $fieldType    = $meta->getTypeOfField($propertyName);
+            $fieldType = $meta->getTypeOfField($propertyName);
+
+            unset($row[$property]);
+
+            $row[$propertyName] = $value;
+
+            if (is_object($value)) {
+                continue;
+            }
 
             if (mb_strtolower($value) === 'null') {
                 $value = null;
@@ -149,7 +157,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                             $criteria = ['id' => $value];
                         }
 
-                        $class           = $meta->getAssociationTargetClass($propertyName);
+                        $class = $meta->getAssociationTargetClass($propertyName);
                         $associatedValue = $this->getEntityManager()->getRepository($class)->findOneBy($criteria);
 
                         if ($associatedValue === null) {
@@ -160,8 +168,6 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                     }
                     break;
             }
-
-            unset($row[$property]);
 
             $row[$propertyName] = $value;
         }
