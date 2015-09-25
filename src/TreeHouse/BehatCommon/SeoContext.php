@@ -261,7 +261,7 @@ class SeoContext extends RawMinkContext
         foreach ($metaElements as $el) {
             $directives = array_merge(
                 $directives,
-                array_map('strtolower', explode(',', $el->getAttribute('content')))
+                array_map('trim', explode(',', mb_strtolower($el->getAttribute('content'))))
             );
         }
 
