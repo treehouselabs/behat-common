@@ -181,7 +181,19 @@ class SeoContext extends RawMinkContext
     }
 
     /**
+     * @Then the meta-description should not contain anything
+     */
+    public function theMetaDescriptionShouldBeEmpty()
+    {
+        $element = $this->getMetaTag('description');
+
+        Assert::assertEmpty($element->getAttribute('content'));
+    }
+
+    /**
      * @Then the meta-description should be :expected
+     *
+     * @param string $expected
      */
     public function theMetaDescriptionShouldBe($expected)
     {
@@ -193,6 +205,8 @@ class SeoContext extends RawMinkContext
 
     /**
      * @Then the meta-description should contain :expected
+     *
+     * @param string $expected
      */
     public function theMetaDescriptionShouldContain($expected)
     {
@@ -214,6 +228,8 @@ class SeoContext extends RawMinkContext
 
     /**
      * @Then the canonical path should be :path
+     *
+     * @param string $path
      */
     public function theCanonicalPathShouldBe($path)
     {
