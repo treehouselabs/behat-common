@@ -26,12 +26,28 @@ class SeoContext extends RawMinkContext
         Assert::assertEquals($title, $link->getText());
     }
 
+	/**
+     * @Then there should not be a link titled :title with attribute :attribute and value :value
+     */
+    public function thereShouldNotBeALinkTitledWithAttributeAndValue($title, $attribute, $value)
+    {
+        $this->thereShouldNotBeAnElementTitledWithAttributeAndValue('a', $title, $attribute, $value);
+    }
+
     /**
      * @Then there should be a(n) :tag element titled :title with attribute :attribute and value :value
      */
     public function thereShouldBeAnElementTitledWithAttributeAndValue($tag, $title, $attribute, $value)
     {
         return $this->assertSession()->elementExists('css', sprintf('%s:contains("%s")[%s="%s"]', $tag, $title, $attribute, $value));
+    }
+
+	/**
+     * @Then there should not be a(n) :tag element with attribute :attribute and value :value
+     */
+    public function thereShouldNotBeAnElementTitledWithAttributeAndValue($tag, $title, $attribute, $value)
+    {
+        $this->assertSession()->elementNotExists('css', sprintf('%s:contains("%s")[%s="%s"]', $tag, $title, $attribute, $value));
     }
 
     /**
