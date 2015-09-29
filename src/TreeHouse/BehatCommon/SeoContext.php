@@ -31,7 +31,7 @@ class SeoContext extends RawMinkContext
      */
     public function thereShouldBeAnElementTitledWithAttributeAndValue($tag, $title, $attribute, $value)
     {
-        return $this->assertSession()->elementExists('css', sprintf('%s:contains("%s")[%s="%s"]', $title, $tag, $attribute, $value));
+        return $this->assertSession()->elementExists('css', sprintf('%s:contains("%s")[%s="%s"]', $tag, $title, $attribute, $value));
     }
 
     /**
