@@ -141,6 +141,13 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                 case 'json_array':
                     $value = json_decode($value, true);
                     break;
+				case 'boolean':
+					if (in_array($value, ['true', '1', 1])) {
+						$value = true;
+					} elseif (in_array($value, ['false', '0', 0])) {
+						$value = false;
+					}
+					break;
                 case 'date':
                 case 'datetime':
                     if (!empty($value)) {
