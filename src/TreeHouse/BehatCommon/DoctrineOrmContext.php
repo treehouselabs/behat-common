@@ -43,13 +43,22 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     protected function persistData($name, array $data)
     {
         $alias = $this->convertNameToAlias($this->singularize($name));
-        $class = $this->getEntityManager()->getClassMetadata($alias)->getName();
+        $meta = $this->getEntityManager()->getClassMetadata($alias);
+
+        // remember generator as it could change during persisting
+        $generatorType = $meta->generatorType;
+        $generator = $meta->idGenerator;
+        $class = $meta->getName();
 
         foreach ($data as $row) {
             $row = $this->applyMapping($this->getFieldMapping($class), $row);
             $row = $this->rowToEntityData($class, $row, true);
             $this->persistEntityData($class, $row);
         }
+
+        // set back generator
+        $meta->setIdGeneratorType($generatorType);
+        $meta->setIdGenerator($generator);
     }
 
     /**
