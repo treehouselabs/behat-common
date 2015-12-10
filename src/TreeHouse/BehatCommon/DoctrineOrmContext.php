@@ -6,6 +6,8 @@ use Behat\Symfony2Extension\Context\KernelAwareContext;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\Common\Util\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Id\AssignedGenerator;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use PHPUnit_Framework_Assert as Assert;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
@@ -243,7 +245,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
         $em->persist($entity);
         $em->flush($entity);
         $em->refresh($entity);
-        $em->clear($entity);
+        $em->clear(get_class($entity));
     }
 
     /**
@@ -275,10 +277,26 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      */
     protected function setId($object, $id)
     {
+        $this->ensureAssignedIdGenerator(get_class($object));
+
         // use reflection to set the id (we shouldn't have a setter for this)
         $reflectionClass = new \ReflectionClass($object);
         $reflectionProperty = $reflectionClass->getProperty('id');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($object, $id);
+    }
+
+    /**
+     * @param string $class
+     */
+    public function ensureAssignedIdGenerator($class)
+    {
+        $manager = $this->getEntityManager();
+        $meta = $manager->getClassMetadata($class);
+
+        if ($meta->generatorType !== ClassMetadata::GENERATOR_TYPE_NONE) {
+            $meta->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+            $meta->setIdGenerator(new AssignedGenerator());
+        }
     }
 }
