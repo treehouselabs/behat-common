@@ -2,6 +2,7 @@
 
 namespace TreeHouse\BehatCommon;
 
+use AppBundle\Entity\Listing;
 use Behat\Symfony2Extension\Context\KernelAwareContext;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\Common\Util\Inflector;
@@ -9,7 +10,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use PHPUnit_Framework_Assert as Assert;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\PropertyAccess\PropertyAccessorBuilder;
 
 class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwareContext
 {
@@ -72,6 +75,10 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
         foreach ($data as $row) {
             $criteria = $this->applyMapping($this->getFieldMapping($class), $row);
             $criteria = $this->rowToEntityData($class, $criteria, false);
+
+            $jsonArrayFields = $this->getJsonArrayFields($class, $criteria);
+            $criteria = array_diff_key($criteria, $jsonArrayFields);
+
             $entity = $this->getEntityManager()->getRepository($class)->findOneBy($criteria);
 
             Assert::assertNotNull(
@@ -82,6 +89,15 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                     json_encode($criteria)
                 )
             );
+
+            if (!empty($jsonArrayFields)) {
+                // json array fields can not be matched by the ORM (depends on driver and requires driver-specific operators),
+                // therefore we need to check these separately
+                $accessor = PropertyAccess::createPropertyAccessor();
+                foreach ($jsonArrayFields as $field => $value) {
+                    Assert::assertSame($value, $accessor->getValue($entity, $field));
+                }
+            }
         }
     }
 
@@ -106,6 +122,20 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                     json_encode($criteria)
                 )
             );
+        }
+    }
+
+    /**
+     * @param string $class
+     */
+    public function ensureAssignedIdGenerator($class)
+    {
+        $manager = $this->getEntityManager();
+        $meta = $manager->getClassMetadata($class);
+
+        if ($meta->generatorType !== ClassMetadata::GENERATOR_TYPE_NONE) {
+            $meta->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+            $meta->setIdGenerator(new AssignedGenerator());
         }
     }
 
@@ -297,15 +327,23 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
 
     /**
      * @param string $class
+     * @param array $fields
+     *
+     * @return array
      */
-    public function ensureAssignedIdGenerator($class)
+    private function getJsonArrayFields($class, array $fields)
     {
-        $manager = $this->getEntityManager();
-        $meta = $manager->getClassMetadata($class);
-
-        if ($meta->generatorType !== ClassMetadata::GENERATOR_TYPE_NONE) {
-            $meta->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
-            $meta->setIdGenerator(new AssignedGenerator());
+        $jsonFields = [];
+        $metadata = $this->getEntityManager()->getClassMetadata($class);
+        foreach ($metadata->getFieldNames() as $field) {
+            if (array_key_exists($field, $fields)) {
+                $mapping = $metadata->getFieldMapping($field);
+                if ($mapping['type'] == 'json_array') {
+                    $jsonFields[$field] = $fields[$field];
+                }
+            }
         }
+
+        return $jsonFields;
     }
 }
