@@ -7,6 +7,7 @@ use Behat\Mink\Exception\UnsupportedDriverActionException;
 use Behat\MinkExtension\Context\RawMinkContext;
 use PHPUnit_Framework_Assert as Assert;
 use Symfony\Component\BrowserKit\Client;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class RedirectContext extends RawMinkContext
 {
@@ -26,6 +27,18 @@ class RedirectContext extends RawMinkContext
     public function iDoNotFollowRedirects()
     {
         $this->getClient()->followRedirects(false);
+    }
+
+    /**
+     * @When I follow the current redirect
+     */
+    public function iFollowTheCurrentRedirect()
+    {
+        $response = $this->getClient()->getResponse();
+
+        Assert::assertInstanceOf(RedirectResponse::class, $response);
+
+        $this->getSession()->visit($response->getTargetUrl());
     }
 
     /**
