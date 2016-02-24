@@ -71,6 +71,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
     {
         $alias = $this->convertNameToAlias($this->singularize($name));
         $class = $this->getEntityManager()->getClassMetadata($alias)->getName();
+        $found = [];
 
         foreach ($data as $row) {
             $criteria = $this->applyMapping($this->getFieldMapping($class), $row);
@@ -98,7 +99,11 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                     Assert::assertSame($value, $accessor->getValue($entity, $field));
                 }
             }
+
+            $found[] = $entity;
         }
+
+        return $found;
     }
 
     /**
