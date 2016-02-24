@@ -68,13 +68,18 @@ class PDOContext extends AbstractPersistenceContext
     protected function assertDataPersisted($name, array $criterias)
     {
         $table = $this->convertNameToTable($this->singularize($name));
+        $found = [];
 
         foreach ($criterias as $criteria) {
             $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
             $this->transformFixture($table, $criteria);
             $match = $this->find($table, $criteria);
             Assert::assertNotEmpty($match);
+
+            $found[] = $match;
         }
+
+        return $found;
     }
 
     /**

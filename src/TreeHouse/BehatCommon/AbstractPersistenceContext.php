@@ -165,6 +165,8 @@ abstract class AbstractPersistenceContext extends RawMinkContext
      * @param array  $data
      *
      * @throw \PHPUnit_Framework_ExpectationFailedException
+     *
+     * @return mixed[]
      */
     abstract protected function assertDataPersisted($name, array $data);
 
