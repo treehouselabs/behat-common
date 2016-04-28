@@ -44,8 +44,7 @@ default:
               - TreeHouse\BehatCommon\SwiftmailerContext
               # Since you are using symfony you probably also need to persist some data with doctrine...?
               - TreeHouse\BehatCommon\DoctrineOrmContext:
-                  prefix: AcmeBundle # defaults to 'AppBundle'
-                  purge_database_tag: purge_db # use this tag in your features to reset the database where needed (default is null)
+                  default_prefix: AcmeBundle # defaults to 'AppBundle'
     extensions:
       Behat\Symfony2Extension: ~
       Behat\MinkExtension:
