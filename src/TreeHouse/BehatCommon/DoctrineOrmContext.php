@@ -92,6 +92,9 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
             );
 
             if (!empty($jsonArrayFields)) {
+                // refresh json fields as they may have changed beforehand
+                $this->getEntityManager()->refresh($entity);
+
                 // json array fields can not be matched by the ORM (depends on driver and requires driver-specific operators),
                 // therefore we need to check these separately
                 $accessor = PropertyAccess::createPropertyAccessor();
