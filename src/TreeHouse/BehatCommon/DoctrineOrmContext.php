@@ -2,7 +2,6 @@
 
 namespace TreeHouse\BehatCommon;
 
-use AppBundle\Entity\Listing;
 use Behat\Symfony2Extension\Context\KernelAwareContext;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\Common\Util\Inflector;
@@ -12,7 +11,6 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use PHPUnit_Framework_Assert as Assert;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Symfony\Component\PropertyAccess\PropertyAccessorBuilder;
 
 class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwareContext
 {
@@ -207,13 +205,14 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                     break;
                 case null:
                     if ($value && $meta->hasAssociation($propertyName)) {
+                        $class = $meta->getAssociationTargetClass($propertyName);
+
                         if (is_array($jsonValue = json_decode($value, true))) {
                             $criteria = $jsonValue;
                         } else {
-                            $criteria = ['id' => $value];
+                            $criteria = [$this->getDefaultIdentifier($class) => $value];
                         }
 
-                        $class = $meta->getAssociationTargetClass($propertyName);
                         $associatedValue = $this->getEntityManager()->getRepository($class)->findOneBy($criteria);
 
                         if ($associatedValue === null) {
@@ -353,5 +352,17 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
         }
 
         return $jsonFields;
+    }
+
+    /**
+     * @param string $class
+     *
+     * @return string
+     */
+    protected function getDefaultIdentifier(string $class) : string
+    {
+        $ids = $this->getEntityManager()->getClassMetadata($class)->getIdentifierFieldNames();
+
+        return reset($ids);
     }
 }
