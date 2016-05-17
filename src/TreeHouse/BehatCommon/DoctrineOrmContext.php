@@ -2,7 +2,6 @@
 
 namespace TreeHouse\BehatCommon;
 
-use AppBundle\Entity\Listing;
 use Behat\Symfony2Extension\Context\KernelAwareContext;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\Common\Util\Inflector;
@@ -12,7 +11,6 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use PHPUnit_Framework_Assert as Assert;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Symfony\Component\PropertyAccess\PropertyAccessorBuilder;
 
 class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwareContext
 {
