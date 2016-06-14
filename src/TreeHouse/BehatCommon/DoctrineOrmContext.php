@@ -203,6 +203,13 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
                         $value = null;
                     }
                     break;
+                case 'datetimetz':
+                    if (!empty($value)) {
+                        $value = new \DateTime($value, new \DateTimeZone('UTC'));
+                    } else {
+                        $value = null;
+                    }
+                    break;
                 case null:
                     if ($value && $meta->hasAssociation($propertyName)) {
                         $class = $meta->getAssociationTargetClass($propertyName);
