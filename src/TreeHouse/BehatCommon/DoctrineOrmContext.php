@@ -297,7 +297,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
         $em = $this->getEntityManager();
         $em->persist($entity);
         $em->flush($entity);
-        //$em->refresh($entity);
+        $em->refresh($entity);
         $em->clear(get_class($entity));
     }
 
