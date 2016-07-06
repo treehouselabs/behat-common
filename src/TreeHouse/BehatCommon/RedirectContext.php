@@ -43,13 +43,17 @@ class RedirectContext extends RawMinkContext
 
     /**
      * @Then I should be redirected to :url
+     * @Then I should be redirected to :url with :status
+     *
+     * @param string $url
+     * @param int    $status
      */
-    public function iAmRedirected($url)
+    public function iAmRedirected($url, $status = 301)
     {
         $headers = $this->getSession()->getResponseHeaders();
 
+        Assert::assertEquals($status, $this->getSession()->getStatusCode());
         Assert::assertArrayHasKey('location', $headers, 'The response contains a "location" header');
-
         Assert::assertEquals($url, $headers['location'][0], 'The "location" header does not point to the correct URI');
 
         $client = $this->getClient();
