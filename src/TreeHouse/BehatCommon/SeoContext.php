@@ -158,6 +158,8 @@ class SeoContext extends RawMinkContext
 
     /**
      * @Then the page can be :action by robots
+     *
+     * @param string $action
      */
     public function thePageCanBeActionByRobots($action)
     {
@@ -166,17 +168,19 @@ class SeoContext extends RawMinkContext
         switch ($action) {
             case 'indexed':
             case 'followed':
-                $needle = substr($action, 0, -2);
+            $directive = substr($action, 0, -2);
                 break;
             default:
-                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s', $action));
         }
 
-        Assert::assertContains($needle, $this->getRobotDirectives());
+        $this->theRobotsMetaHasDirective($directive);
     }
 
     /**
      * @Then the page can not be :action by robots
+     *
+     * @param string $action
      */
     public function thePageCanNotBeActionByRobots($action)
     {
@@ -184,16 +188,26 @@ class SeoContext extends RawMinkContext
 
         switch ($action) {
             case 'indexed':
-                $needle = "noindex";
+                $directive = "noindex";
                 break;
             case 'followed':
-                $needle = "nofollow";
+                $directive = "nofollow";
                 break;
             default:
-                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s',$action));
+                throw new \InvalidArgumentException(sprintf('Unknown robots action: %s', $action));
         }
 
-        Assert::assertContains($needle, $this->getRobotDirectives());
+        $this->theRobotsMetaHasDirective($directive);
+    }
+
+    /**
+     * @Then the robots meta has :directive
+     *
+     * @param string $directive
+     */
+    public function theRobotsMetaHasDirective($directive)
+    {
+        Assert::assertContains($directive, $this->getRobotDirectives());
     }
 
     /**
