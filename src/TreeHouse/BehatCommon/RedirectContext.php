@@ -48,7 +48,7 @@ class RedirectContext extends RawMinkContext
      * @param string $url
      * @param int    $status
      */
-    public function iAmRedirected($url, $status = 301)
+    public function iAmRedirected($url, $status = 302)
     {
         $headers = $this->getSession()->getResponseHeaders();
 
