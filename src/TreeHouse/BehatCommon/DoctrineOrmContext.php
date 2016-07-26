@@ -366,7 +366,7 @@ class DoctrineOrmContext extends AbstractPersistenceContext implements KernelAwa
      *
      * @return string
      */
-    protected function getDefaultIdentifier(string $class) : string
+    protected function getDefaultIdentifier($class)
     {
         $ids = $this->getEntityManager()->getClassMetadata($class)->getIdentifierFieldNames();
 
