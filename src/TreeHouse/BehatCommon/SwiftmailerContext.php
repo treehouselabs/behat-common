@@ -115,6 +115,24 @@ class SwiftmailerContext extends RawMinkContext implements KernelAwareContext
     }
 
     /**
+     * @Then the email header should contain :header
+     */
+    public function theEmailHeaderShouldContain($header)
+    {
+        Assert::assertTrue($this->message->getHeaders()->has($header));
+    }
+
+    /**
+     * @Then the email header should contain :header with value :value
+     */
+    public function theEmailHeaderShouldContainWithValue($header, $value)
+    {
+        $this->theEmailHeaderShouldContain($header);
+
+        Assert::assertEquals($value, $this->message->getHeaders()->get($header)->getFieldBody());
+    }
+
+    /**
      * @Then the email body should contain :text
      */
     public function theEmailBodyShouldContainText($text)
