@@ -4,7 +4,7 @@ namespace TreeHouse\BehatCommon;
 
 use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Symfony2Extension\Context\KernelAwareContext;
-use PHPUnit_Framework_Assert as Assert;
+use PHPUnit\Framework\Assert;
 use Symfony\Component\DomCrawler\Crawler;
 
 class SwiftmailerContext extends RawMinkContext implements KernelAwareContext

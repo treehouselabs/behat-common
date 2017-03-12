@@ -4,7 +4,7 @@ namespace TreeHouse\BehatCommon;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
-use PHPUnit_Framework_Assert as Assert;
+use PHPUnit\Framework\Assert;
 
 class PDOContext extends AbstractPersistenceContext
 {

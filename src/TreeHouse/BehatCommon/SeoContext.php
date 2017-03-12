@@ -4,7 +4,7 @@ namespace TreeHouse\BehatCommon;
 
 use Behat\Mink\Element\NodeElement;
 use Behat\MinkExtension\Context\RawMinkContext;
-use PHPUnit_Framework_Assert as Assert;
+use PHPUnit\Framework\Assert;
 
 class SeoContext extends RawMinkContext
 {
