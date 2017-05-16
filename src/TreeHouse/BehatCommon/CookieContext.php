@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TreeHouse\BehatCommon;
 
 use Behat\Mink\Driver\BrowserKitDriver;
@@ -10,12 +12,17 @@ use PHPUnit\Framework\Assert;
 class CookieContext extends RawMinkContext
 {
     /**
-     * @Given a cookie named :name should have been added to the response with a lifetime of :lifetimeCount :lifetimePeriod
+     * @Then a cookie named :name should have been added to the response
+     * @Then a cookie named :name should have been added to the response with a lifetime of :lifetimeCount :lifetimePeriod
+     *
+     * @param      $name
+     * @param null $lifetimeCount
+     * @param null $lifetimePeriod
      */
     public function aCookieNamedShouldHaveBeenAddedToTheResponseWithALifeTimeOf(
         $name,
-        $lifetimeCount,
-        $lifetimePeriod
+        $lifetimeCount = null,
+        $lifetimePeriod = null
     ) {
         $driver = $this->getSession()->getDriver();
         if (!$driver instanceof BrowserKitDriver) {
@@ -26,6 +33,18 @@ class CookieContext extends RawMinkContext
 
         Assert::assertNotNull($cookie, sprintf('A cookie should have been made named %s', $name));
 
+        if ($lifetimeCount !== null && $lifetimePeriod !== null) {
+            $this->assertLifetime($lifetimeCount, $lifetimePeriod, $cookie);
+        }
+    }
+
+    /**
+     * @param $lifetimeCount
+     * @param $lifetimePeriod
+     * @param $cookie
+     */
+    private function assertLifetime($lifetimeCount, $lifetimePeriod, $cookie)
+    {
         $lifetime = $lifetimeCount . ' ' . $lifetimePeriod;
         $expectedExpiresTime = strtotime($lifetime);
         $actualExpiresTime = $cookie->getExpiresTime();
