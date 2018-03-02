@@ -16,7 +16,7 @@
     "doctrine/common": "^2.2",
     "doctrine/data-fixtures": "^1.1",
     "phpunit/phpunit": "^5.7|^6.0",
-    "swiftmailer/swiftmailer": "^5.0",
+    "swiftmailer/swiftmailer": "^6.0",
     "symfony/dependency-injection": "^3.0",
     "symfony/http-kernel": "^3.0",
     "symfony/property-access": "^3.0",

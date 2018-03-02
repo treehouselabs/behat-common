@@ -222,7 +222,6 @@ class SwiftmailerContext extends RawMinkContext implements KernelAwareContext
 
         $files = [];
 
-        /** @var \Swift_Mime_MimeEntity $child */
         foreach ($this->message->getChildren() as $child) {
             if (null !== $disposition = $child->getHeaders()->get('content-disposition')) {
                 /** @var \Swift_Mime_Headers_ParameterizedHeader $disposition */
