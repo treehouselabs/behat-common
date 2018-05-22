@@ -93,7 +93,7 @@ class PDOContext extends AbstractPersistenceContext
             $criteria = $this->applyMapping($this->getFieldMapping($table), $criteria);
             $this->transformFixture($table, $criteria);
             $match = $this->find($table, $criteria);
-            Assert::assertNotEmpty(
+            Assert::assertEmpty(
                 $match,
                 sprintf(
                     'There should not be a record in table "%s" with these criteria: %s',
