@@ -15,7 +15,7 @@
     "doctrine/orm": "^2.2",
     "doctrine/common": "^2.2",
     "doctrine/data-fixtures": "^1.1",
-    "phpunit/phpunit": "^5.7|^6.0",
+    "phpunit/phpunit": "^5.7|^6|^7",
     "swiftmailer/swiftmailer": "^6.0",
     "symfony/dependency-injection": "^3.0",
     "symfony/http-kernel": "^3.0",
@@ -31,6 +31,6 @@
     "bin-dir": "bin"
   },
   "replace": {
-    "treehouselabs/behat-common": "self.version",
+    "treehouselabs/behat-common": "self.version"
   }
 }
