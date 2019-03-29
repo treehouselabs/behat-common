@@ -1,5 +1,5 @@
 {
-  "name": "treehouselabs/behat-common",
+  "name": "clippings/behat-common",
   "description": "Common Behat contexts to use in our Symfony projects",
   "license": "MIT",
   "type": "library",
@@ -29,5 +29,8 @@
   },
   "config": {
     "bin-dir": "bin"
+  },
+  "replace": {
+    "treehouselabs/behat-common": "self.version",
   }
 }

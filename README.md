@@ -7,7 +7,7 @@ Collection of contexts and traits for writing Behat features in your Symfony pro
 
 ### 1. Install the package through composer
 
-Just run `composer require --dev treehouselabs/behat-common`
+Just run `composer require --dev clippings/behat-common`
 
 
 ### 2. Create a feature context like normal (extending `RawMinkContext`)
