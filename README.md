@@ -1,3 +1,15 @@
+Deprecated & archived
+=====================
+
+This package is no longer maintained. It is advised to write specific contexts and step definitions, or use better maintained ones. Good starting points are:
+
+* https://github.com/FriendsOfBehat
+* https://packagist.org/?type=behat-extension
+
+Previous readme below 👇
+
+---
+
 # Behat Common
 
 Collection of contexts and traits for writing Behat features in your Symfony projects.
